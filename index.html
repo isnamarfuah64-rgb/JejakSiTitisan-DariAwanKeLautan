@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siklus Air - Media Pembelajaran SD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Nunito', sans-serif; }
+        body { background-color: #e0f7fa; color: #333; }
+        .hidden { display: none !important; }
+        .page { min-height: 100vh; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+
+        h1, h2, h3 { color: #0277bd; margin-bottom: 15px; text-align: center; }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; margin: 5px; }
+        .btn.primary { background-color: #0288d1; color: white; }
+        .btn.primary:hover { background-color: #01579b; }
+        .btn.secondary { background-color: #ffb300; color: white; }
+        .btn.danger { background-color: #d32f2f; color: white; }
+
+        /* Login */
+        .login-container { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; margin: auto; }
+        .mascot img { width: 120px; height: 120px; border-radius: 50%; margin: 10px 0; border: 4px solid #b3e5fc; }
+        input { padding: 12px; border: 2px solid #b3e5fc; border-radius: 8px; font-size: 16px; width: 100%; margin-bottom: 15px; }
+
+        /* Dashboard */
+        #dashboard-page { max-width: 800px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 800px; background: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; width: 100%; }
+        .menu-card { background: white; padding: 20px; font-size: 18px; font-weight: bold; color: #0288d1; border: 2px solid #b3e5fc; border-radius: 15px; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        .menu-card:hover { transform: translateY(-5px); background: #e1f5fe; }
+        .menu-card.disabled { background: #e0e0e0; color: #9e9e9e; border-color: #bdbdbd; cursor: not-allowed; }
+        .menu-card.disabled:hover { transform: none; background: #e0e0e0; }
+
+        /* Materi */
+        .materi-container { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 800px; width: 100%; font-size: 18px; line-height: 1.6; }
+        .materi-container img { max-width: 100%; border-radius: 10px; margin: 15px 0; max-height: 300px; object-fit: cover; }
+        .nav-buttons { display: flex; justify-content: space-between; width: 100%; max-width: 800px; margin-top: 20px; }
+
+        /* Kuis */
+        .kuis-container { background: white; padding: 30px; border-radius: 15px; max-width: 600px; width: 100%; }
+        .options { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .option-btn { padding: 12px; border: 2px solid #0288d1; background: white; border-radius: 8px; cursor: pointer; font-size: 16px; transition: 0.2s; text-align: left; }
+        .option-btn:hover { background: #e1f5fe; }
+
+        /* Hasil */
+        .hasil-container { background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px; width: 100%; margin: auto; }
+        .score-card { background: #fff3e0; padding: 20px; border-radius: 15px; margin: 20px 0; border: 2px solid #ffb300; }
+        .score-card h1 { font-size: 60px; color: #f57c00; margin: 0; }
+        
+        .chapter-title { background: #0288d1; color: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Halaman Login -->
+        <section id="login-page" class="page active">
+            <div class="login-container">
+                <h1>Siklus Air & Hujan</h1>
+                <div class="mascot">
+                    <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Titisan&backgroundColor=b6e3f4" alt="Maskot Si Titisan">
+                </div>
+                <p style="margin-bottom: 20px;">Halo! Aku Si Titisan. Yuk belajar proses terjadinya hujan bersamaku secara bertahap!</p>
+                <div class="login-form active">
+                    <input type="text" id="siswa-nama" placeholder="Masukkan Namamu">
+                    <input type="text" id="siswa-kelas" placeholder="Masukkan Kelasmu (Misal: 5A)">
+                    <button class="btn primary" onclick="loginSiswa()">Mulai Belajar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard -->
+        <section id="dashboard-page" class="page hidden">
+            <header>
+                <h2 id="welcome-msg">Halo, Siswa!</h2>
+                <button class="btn danger" onclick="logout()">Keluar</button>
+            </header>
+            <div class="dashboard-content" style="width: 100%; max-width: 800px;">
+                <p style="margin-bottom: 15px; text-align: center;">Selesaikan materi per bab, lalu kerjakan kuisnya untuk membuka bab selanjutnya!</p>
+                <div class="menu-grid" id="chapter-list">
+                    <!-- Daftar Bab akan di-generate via JS -->
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn secondary hidden" id="btn-hasil-akhir" onclick="showHasilAkhir()">🏆 Lihat Hasil Akhir & Sertifikat</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Materi Page -->
+        <section id="materi-page" class="page hidden">
+            <header>
+                <h2>Materi Pembelajaran</h2>
+                <button class="btn secondary" onclick="openPage('dashboard-page')">Kembali ke Dashboard</button>
+            </header>
+            <div class="materi-container">
+                <h3 class="chapter-title" id="materi-chapter-title">Bab 1</h3>
+                <div id="materi-content">
+                    <!-- Konten Materi -->
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="btn" id="btn-prev-materi" onclick="prevMateri()">Sebelumnya</button>
+                <button class="btn primary" id="btn-next-materi" onclick="nextMateri()">Berikutnya</button>
+            </div>
+        </section>
+
+        <!-- Kuis Page -->
+        <section id="kuis-page" class="page hidden">
+            <header>
+                <h2>Kuis Evaluasi</h2>
+            </header>
+            <div class="kuis-container">
+                <h3 class="chapter-title" id="kuis-chapter-title">Kuis Bab 1</h3>
+                <h4 id="question-text" style="margin-bottom: 15px;">Pertanyaan</h4>
+                <div id="options-container" class="options"></div>
+            </div>
+        </section>
+
+        <!-- Hasil Bab Page -->
+        <section id="hasil-bab-page" class="page hidden">
+            <div class="hasil-container">
+                <h2 id="hasil-bab-title">Hasil Kuis Bab 1</h2>
+                <div class="score-card">
+                    <h1 id="hasil-bab-skor">100</h1>
+                    <p>Benar: <span id="hasil-bab-benar">0</span> | Salah: <span id="hasil-bab-salah">0</span></p>
+                </div>
+                <p id="hasil-bab-status" style="margin-bottom: 20px;">Luar Biasa!</p>
+                <button class="btn primary" onclick="kembaliKeDashboard()">Lanjut ke Tahap Berikutnya</button>
+                <button class="btn secondary" onclick="startKuis(currentChapterIndex)">Ulangi Kuis Bab Ini</button>
+            </div>
+        </section>
+
+        <!-- Hasil Akhir Page -->
+        <section id="hasil-akhir-page" class="page hidden">
+            <header>
+                <h2>Rapor Akhir Pembelajaran</h2>
+                <button class="btn secondary" onclick="openPage('dashboard-page')">Dashboard</button>
+            </header>
+            <div class="hasil-container">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Titisan&backgroundColor=b6e3f4" alt="Maskot" width="100" style="border-radius: 50%; border: 3px solid #0288d1; margin-bottom: 15px;">
+                <h3>Selamat, <span id="akhir-nama"></span>!</h3>
+                <p>Kamu telah menyelesaikan semua tahapan materi Siklus Air.</p>
+                <div class="score-card">
+                    <p style="font-weight: bold; margin-bottom: 10px;">Total Skor Keseluruhan:</p>
+                    <h1 id="akhir-skor">100</h1>
+                </div>
+                <button class="btn primary" onclick="alert('Sertifikat berhasil diunduh!')">Unduh Sertifikat Kelulusan</button>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // Struktur Data Bertahap (Per Bab)
+        const chapterData = [
+            {
+                babTitle: "Bab 1: Konsep Dasar Siklus Air & Pembentukan Hujan",
+                materi: [
+                    {
+                        title: "Apa itu Siklus Air?",
+                        text: "<p><b>Siklus air</b> adalah perputaran air secara terus-menerus dari bumi ke atmosfer, lalu kembali lagi ke bumi. Inilah yang membuat air di bumi tidak pernah habis!</p>",
+                        img: "https://images.unsplash.com/photo-1534274988757-a28bf1a57c17?auto=format&fit=crop&w=500&q=60"
+                    },
+                    {
+                        title: "Proses Pembentukan Hujan Secara Rinci",
+                        text: "<p>Tahukah kamu bagaimana hujan bisa turun? Prosesnya sangat luar biasa:</p><ul><li style='margin-bottom:10px;'><b>1. Evaporasi & Transpirasi:</b> Panas matahari membuat air laut, sungai, dan danau menguap menjadi uap air (Evaporasi). Tumbuhan juga melepaskan uap air ke udara (Transpirasi).</li><li style='margin-bottom:10px;'><b>2. Kondensasi:</b> Uap air naik ke langit yang suhunya dingin. Uap ini berubah menjadi titik-titik air kecil yang berkumpul membentuk <b>Awan</b>.</li><li style='margin-bottom:10px;'><b>3. Adveksi:</b> Awan ditiup oleh angin berpindah dari lautan menuju daratan.</li><li style='margin-bottom:10px;'><b>4. Presipitasi:</b> Saat awan sudah sangat tebal, hitam, dan berat, titik-titik air tidak bisa ditahan lagi dan jatuh ke bumi sebagai <b>Hujan</b> atau salju!</li><li style='margin-bottom:10px;'><b>5. Infiltrasi:</b> Air hujan yang jatuh akan meresap ke dalam pori-pori tanah (menjadi air tanah) atau mengalir di permukaan (sungai) kembali ke laut.</li></ul>",
+                        img: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?auto=format&fit=crop&w=500&q=60"
+                    }
+                ],
+                kuis: [
+                    { q: "Proses menguapnya air laut karena dipanaskan oleh sinar matahari disebut...", options: ["Kondensasi", "Evaporasi", "Presipitasi", "Transpirasi"], answer: 1 },
+                    { q: "Saat uap air naik ke langit dan berubah menjadi awan karena suhu dingin, proses ini dinamakan...", options: ["Evaporasi", "Infiltrasi", "Kondensasi", "Presipitasi"], answer: 2 },
+                    { q: "Peristiwa jatuhnya titik-titik air dari awan ke bumi sebagai hujan disebut...", options: ["Presipitasi", "Evaporasi", "Infiltrasi", "Adveksi"], answer: 0 }
+                ]
+            },
+            {
+                babTitle: "Bab 2: Faktor yang Mempengaruhi Siklus Air",
+                materi: [
+                    {
+                        title: "Kegiatan Manusia yang Menghambat",
+                        text: "<p>Aktivitas manusia bisa mengganggu siklus air, lho! Contohnya:</p><ul><li><b>Penebangan Hutan Liar:</b> Tanah tidak bisa menyerap air tanpa akar pohon.</li><li><b>Pencemaran Air:</b> Membuang sampah/limbah ke sungai membuat air kotor.</li><li><b>Betonisasi:</b> Jalan aspal/beton membuat air hujan tidak bisa meresap ke tanah, sehingga memicu banjir.</li></ul>",
+                        img: "https://images.unsplash.com/photo-1611273426858-450d8e3c9cce?auto=format&fit=crop&w=500&q=60"
+                    },
+                    {
+                        title: "Kegiatan yang Mendukung Siklus Air",
+                        text: "<p>Kita bisa membantu kelancaran siklus air dengan cara:</p><ul><li><b>Reboisasi:</b> Menanam kembali pohon yang gundul.</li><li><b>Membuat Biopori:</b> Membuat lubang resapan air di halaman rumah.</li><li><b>Menjaga Kebersihan Sungai:</b> Agar aliran air ke laut tidak terhambat.</li></ul>",
+                        img: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=500&q=60"
+                    }
+                ],
+                kuis: [
+                    { q: "Salah satu kegiatan manusia yang dapat menyebabkan banjir karena air tidak bisa meresap adalah...", options: ["Reboisasi hutan", "Menutup halaman dengan tanah", "Membangun jalan dengan aspal/beton", "Membuat sumur resapan"], answer: 2 },
+                    { q: "Apa manfaat utama dari menanam pohon (reboisasi) bagi siklus air?", options: ["Membuat air laut lebih asin", "Membantu akar pohon mengikat dan menyerap air hujan ke dalam tanah", "Mempercepat penguapan air di danau", "Membuat awan menjadi lebih gelap"], answer: 1 }
+                ]
+            },
+            {
+                babTitle: "Bab 3 & 4: Dampak & Manfaat Air Bersih",
+                materi: [
+                    {
+                        title: "Dampak Siklus Air & Manfaatnya",
+                        text: "<p>Siklus air menjaga suhu bumi tidak terlalu panas. Air bersih hasil dari siklus ini sangat bermanfaat bagi:</p><ul><li><b>Manusia:</b> Untuk minum, mandi, mencuci, dan memasak.</li><li><b>Hewan:</b> Sebagai air minum dan tempat tinggal (seperti ikan).</li><li><b>Tumbuhan:</b> Air sangat penting untuk proses fotosintesis agar tumbuhan bisa hidup dan menghasilkan oksigen.</li></ul>",
+                        img: "https://images.unsplash.com/photo-1527066236129-8bf5384bc1db?auto=format&fit=crop&w=500&q=60"
+                    }
+                ],
+                kuis: [
+                    { q: "Bagi tumbuhan, air bersih sangat dibutuhkan untuk melakukan proses...", options: ["Kondensasi", "Fotosintesis", "Perkembangbiakan", "Hibernasi"], answer: 1 },
+                    { q: "Tanpa adanya siklus air, apa yang kemungkinan akan terjadi pada makhluk hidup di bumi?", options: ["Kekurangan air bersih dan kekeringan", "Air laut akan semakin bertambah banyak", "Makhluk hidup tidak akan terkena dampaknya", "Tumbuhan akan tumbuh lebih cepat"], answer: 0 }
+                ]
+            },
+            {
+                babTitle: "Bab 5: Cara Menjaga Ketersediaan Air",
+                materi: [
+                    {
+                        title: "Ayo Hemat Air!",
+                        text: "<p>Meskipun siklus air terus berjalan, air bersih yang layak pakai jumlahnya terbatas. Cara menjaganya:</p><ul><li>Gunakan air secukupnya saat mandi atau cuci piring.</li><li>Segera perbaiki keran atau pipa yang bocor.</li><li>Tidak mencuci kendaraan setiap hari.</li><li>Jaga pepohonan di sekitar kita!</li></ul>",
+                        img: "https://images.unsplash.com/photo-1581057410313-255d60fc2774?auto=format&fit=crop&w=500&q=60"
+                    }
+                ],
+                kuis: [
+                    { q: "Tindakan yang menunjukkan sikap menghemat air di rumah adalah...", options: ["Membiarkan keran air menyala saat menyikat gigi", "Mandi menggunakan air sebanyak-banyaknya", "Memperbaiki pipa air yang bocor secepatnya", "Mencuci motor setiap pagi walaupun bersih"], answer: 2 },
+                    { q: "Mengapa kita tidak boleh membuang sampah ke sungai?", options: ["Karena membuat sungai menjadi lebih dalam", "Karena dapat menghambat aliran sungai dan mencemari air", "Karena sampah bisa dimakan ikan", "Karena air sungai tidak bisa menguap"], answer: 1 }
+                ]
+            }
+        ];
+
+        let studentData = { nama: '', kelas: '', currentChapterUnlocked: 0, scores: [] };
+        
+        // Variabel state Navigasi
+        let currentChapterIndex = 0;
+        let currentMateriIndex = 0;
+        
+        // Variabel state Kuis
+        let currentQuizIndex = 0;
+        let currentQuizScore = 0;
+        let currentQuizData = [];
+
+        function switchLogin(role) {
+            alert('Fitur login guru dalam pengembangan. Silakan login sebagai Siswa.');
+        }
+
+        function loginSiswa() {
+            const nama = document.getElementById('siswa-nama').value;
+            const kelas = document.getElementById('siswa-kelas').value;
+            if(nama && kelas) {
+                // Cek data lama
+                const saved = localStorage.getItem('studentData_SiklusAir');
+                if(saved) {
+                    const parsed = JSON.parse(saved);
+                    if(parsed.nama === nama) {
+                        studentData = parsed; // Lanjut progress sebelumnya
+                    } else {
+                        studentData = { nama, kelas, currentChapterUnlocked: 0, scores: [] };
+                    }
+                } else {
+                    studentData = { nama, kelas, currentChapterUnlocked: 0, scores: [] };
+                }
+                
+                saveData();
+                document.getElementById('welcome-msg').innerText = `Halo, ${nama}!`;
+                openPage('dashboard-page');
+                renderDashboard();
+            } else {
+                alert('Isi nama dan kelas dulu ya!');
+            }
+        }
+
+        function logout() {
+            openPage('login-page');
+        }
+
+        function openPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        function renderDashboard() {
+            const container = document.getElementById('chapter-list');
+            container.innerHTML = '';
+            
+            chapterData.forEach((chap, index) => {
+                const btn = document.createElement('button');
+                btn.className = `menu-card ${index > studentData.currentChapterUnlocked ? 'disabled' : ''}`;
+                
+                let text = chap.babTitle;
+                if(index < studentData.currentChapterUnlocked) {
+                    text += " ✅ (Selesai)";
+                } else if (index === studentData.currentChapterUnlocked) {
+                    text += " 🔓 (Buka Sekarang)";
+                } else {
+                    text += " 🔒 (Terkunci)";
+                }
+                
+                btn.innerText = text;
+                btn.onclick = () => {
+                    if(index <= studentData.currentChapterUnlocked) {
+                        startChapter(index);
+                    } else {
+                        alert("Selesaikan bab sebelumnya dan kuisnya terlebih dahulu!");
+                    }
+                };
+                container.appendChild(btn);
+            });
+
+            // Tombol hasil akhir muncul jika semua bab selesai
+            if (studentData.currentChapterUnlocked >= chapterData.length) {
+                document.getElementById('btn-hasil-akhir').classList.remove('hidden');
+            }
+        }
+
+        // --- SISTEM MATERI ---
+        function startChapter(index) {
+            currentChapterIndex = index;
+            currentMateriIndex = 0;
+            document.getElementById('materi-chapter-title').innerText = chapterData[index].babTitle;
+            openPage('materi-page');
+            renderMateri();
+        }
+
+        function renderMateri() {
+            const materiArr = chapterData[currentChapterIndex].materi;
+            const mat = materiArr[currentMateriIndex];
+            
+            document.getElementById('materi-content').innerHTML = `
+                <h3>${mat.title}</h3>
+                <img src="${mat.img}" alt="Ilustrasi">
+                ${mat.text}
+            `;
+
+            document.getElementById('btn-prev-materi').style.visibility = currentMateriIndex === 0 ? 'hidden' : 'visible';
+            
+            const btnNext = document.getElementById('btn-next-materi');
+            if (currentMateriIndex === materiArr.length - 1) {
+                btnNext.innerText = "Kerjakan Kuis Bab Ini";
+                btnNext.classList.remove('primary');
+                btnNext.classList.add('secondary');
+                btnNext.onclick = () => startKuis(currentChapterIndex);
+            } else {
+                btnNext.innerText = "Materi Berikutnya";
+                btnNext.classList.remove('secondary');
+                btnNext.classList.add('primary');
+                btnNext.onclick = () => nextMateri();
+            }
+        }
+
+        function nextMateri() {
+            currentMateriIndex++;
+            renderMateri();
+        }
+
+        function prevMateri() {
+            currentMateriIndex--;
+            renderMateri();
+        }
+
+        // --- SISTEM KUIS ---
+        function startKuis(chapterIndex) {
+            currentQuizData = chapterData[chapterIndex].kuis;
+            currentQuizIndex = 0;
+            currentQuizScore = 0;
+            
+            document.getElementById('kuis-chapter-title').innerText = "Kuis " + chapterData[chapterIndex].babTitle;
+            openPage('kuis-page');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuizIndex >= currentQuizData.length) {
+                finishKuis();
+                return;
+            }
+            const q = currentQuizData[currentQuizIndex];
+            document.getElementById('question-text').innerText = `${currentQuizIndex + 1}. ${q.q}`;
+            
+            const optionsDiv = document.getElementById('options-container');
+            optionsDiv.innerHTML = '';
+            
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(idx, q.answer);
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selected, correct) {
+            if (selected === correct) {
+                currentQuizScore++;
+            }
+            currentQuizIndex++;
+            showQuestion();
+        }
+
+        function finishKuis() {
+            const totalQ = currentQuizData.length;
+            const scorePercentage = Math.round((currentQuizScore / totalQ) * 100);
+            
+            // Simpan skor
+            studentData.scores[currentChapterIndex] = scorePercentage;
+            
+            // Unlock next chapter jika belum kebuka
+            if (currentChapterIndex === studentData.currentChapterUnlocked) {
+                studentData.currentChapterUnlocked++;
+            }
+            saveData();
+
+            // Tampilkan hasil bab
+            openPage('hasil-bab-page');
+            document.getElementById('hasil-bab-title').innerText = `Hasil Kuis Bab ${currentChapterIndex + 1}`;
+            document.getElementById('hasil-bab-skor').innerText = scorePercentage;
+            document.getElementById('hasil-bab-benar').innerText = currentQuizScore;
+            document.getElementById('hasil-bab-salah').innerText = totalQ - currentQuizScore;
+            
+            if (scorePercentage >= 70) {
+                document.getElementById('hasil-bab-status').innerText = "Hebat! Kamu bisa lanjut ke bab berikutnya.";
+            } else {
+                document.getElementById('hasil-bab-status').innerText = "Jangan menyerah! Coba pahami lagi materinya ya.";
+            }
+        }
+
+        function kembaliKeDashboard() {
+            openPage('dashboard-page');
+            renderDashboard();
+        }
+
+        function showHasilAkhir() {
+            openPage('hasil-akhir-page');
+            document.getElementById('akhir-nama').innerText = studentData.nama;
+            
+            // Hitung rata-rata
+            let total = 0;
+            studentData.scores.forEach(s => total += s);
+            let rataRata = Math.round(total / chapterData.length);
+            
+            document.getElementById('akhir-skor').innerText = rataRata;
+        }
+
+        function saveData() {
+            localStorage.setItem('studentData_SiklusAir', JSON.stringify(studentData));
+        }
+    </script>
+</body>
+</html>
